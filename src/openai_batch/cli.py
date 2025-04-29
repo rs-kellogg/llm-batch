@@ -3,10 +3,10 @@ import math
 
 import fitz
 import openai
-import chevron
 import logging
 import logging.config
 import polars as pl
+import chevron
 
 from pathlib import Path, PosixPath
 from dotenv import load_dotenv, find_dotenv
@@ -64,6 +64,17 @@ app.command(utils_app, name="utils")
 def config() -> None:
     "Display configuration parameters"
     console.print(f"{CONFIG}")
+
+
+# -----------------------------------------------------------------------------
+@utils_app.command()
+def display(
+    file: Annotated[Path, Parameter(help="Path to file")] = None,
+):
+    """
+    Display the contents of a file
+    """
+    console.print(file.read_text())
 
 
 # -----------------------------------------------------------------------------
@@ -145,7 +156,9 @@ def make(
     prompt_template = prompt_template_file.read_text()
 
     # Read the data file
-    if data_file.suffix == "csv":
+    df = pl.DataFrame()
+    print(f"Data file: {data_file}, {data_file.suffix}")
+    if data_file.suffix == ".csv":
         df = pl.read_csv(data_file)
     elif data_file.suffix == ".xlsx":
         df = pl.read_excel(data_file)
@@ -183,7 +196,7 @@ def make(
 
 # -----------------------------------------------------------------------------
 @app.command()
-def upload(
+def send(
     batch_file: Annotated[Path, Parameter(help="Batch file")] = None,
 ):
     """
@@ -240,10 +253,9 @@ def fetch(
         console.print(f"[orange1]writing json output to {out_file}")
 
 
-
 # -----------------------------------------------------------------------------
 @app.command()
-def list_batches(
+def list(
     limit: Annotated[int, Parameter("--limit", "-l", help="Limit the number of batches to list")] = 100,
 ):
     """
@@ -254,17 +266,6 @@ def list_batches(
     batches = sorted(batches, key=lambda x: x.created_at)
     for b in batches:
         console.print(b.id, b.status, datetime.fromtimestamp(b.created_at))
-
-
-# -----------------------------------------------------------------------------
-@app.command()
-def display(
-    file: Annotated[Path, Parameter(help="Path to file")] = None,
-):
-    """
-    Display the contents of a file
-    """
-    console.print(file.read_text())
 
 
 # -----------------------------------------------------------------------------
