@@ -165,6 +165,10 @@ def make(
     if id_col not in df.columns:
         df = df.with_row_index(name=id_col)
 
+    for col in df.columns:
+        if col.startswith("file"):
+            df = df.with_columns(pl.col(col).map_elements(lambda x: Path(x).read_text()))
+
     print(df.head())
 
     # Create the output file
@@ -179,7 +183,8 @@ def make(
     for index in track(range(len(data)), description="Processing..."):
         try:
             body = chevron.render(prompt_template, data[index])
-            body = json.loads(body)
+            # body = json.loads(body)
+            print(body)
             request = {
                 "custom_id": f"id_{data[index][id_col]}",
                 "method": "POST",
@@ -188,7 +193,8 @@ def make(
             }
             requests.append(request)
         except Exception as e:
-            console.print(f"\nError processing row {index}")
+            console.print(f"\nError processing row {index}: {e}")
+            return
 
     out_file.write_text("\n".join([json.dumps(r) for r in requests]))
     console.print(f"Batch file created: {out_file}")

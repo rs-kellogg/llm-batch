@@ -12,3 +12,4 @@ wheels/
 # Misc
 **/*.log
 **/*~
+.DS_Store
