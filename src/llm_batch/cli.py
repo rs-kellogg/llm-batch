@@ -3,10 +3,10 @@ import math
 
 import fitz
 import openai
+import yaml
 import logging
 import logging.config
 import polars as pl
-import chevron
 
 from pathlib import Path, PosixPath
 from dotenv import load_dotenv, find_dotenv
@@ -18,37 +18,34 @@ from typing import List, Dict
 from cyclopts import App, Parameter
 from typing_extensions import Annotated
 
-from openai_batch import utils as F
-from openai_batch import data
-from openai_batch import __version__
+from llm_batch import data
+from llm_batch import __version__
+
 
 # -----------------------------------------------------------------------------
 # setup
 # -----------------------------------------------------------------------------
 
-# load environment variables
-load_dotenv(find_dotenv((PosixPath('~/.openai')).expanduser()/".env"))
+load_dotenv()
 
-# load in the configuration file
+
+help_msg = """
+Commands to execute LLM batcb jobs.
+"""
+app = App(help=help_msg, version=__version__)
+
+
+console = Console(style="white on black")
+
+
+CONFIG = {}
 with resources.path(data, "config.yml") as path:
-    CONFIG = F.config(path)
+    CONFIG = yaml.load(open(path), Loader=yaml.FullLoader)
 
 # setup logging
 logging.config.dictConfig(CONFIG["logging"])
 logger = logging.getLogger(__name__)
 
-# setup the rich console
-console = Console(style="green on black")
-
-# setup the CLI app
-help_msg = """
-Commands to create, upload, and execute batch jobs using the OpenAI API.
-
-To set up OpenAI API credentials, create a file /home/<user>/.openai/.env with the following content:
- 
-OPENAI_API_KEY=<your-openai-api-key>
-"""
-app = App(help=help_msg, version=__version__)
 
 # add sub-apps
 # batch_app = App(help="Help string for the asynchronous batch application.", version=__version__)
@@ -106,39 +103,6 @@ def pdf2text(
 
 # -----------------------------------------------------------------------------
 # batch commands
-# -----------------------------------------------------------------------------
-@utils_app.command()
-def chat_complete(
-    batch_file: Annotated[Path, Parameter(help="Batch file")] = None,
-    out: Annotated[Path, Parameter(help="Path to output files")] = Path("."),
-    format: Annotated[str, Parameter(help="Output format")] = "json",
-):
-    """
-    Run a batch file line by line in synchronous non-batch mode.
-    """
-    if not batch_file.exists():
-        raise FileNotFoundError(f"batch file not found: {batch_file}")
-    
-    if not out.exists():
-        out.mkdir(parents=True)
-
-    # Read the batch file
-    with open(batch_file, "r") as f:
-        client = openai.OpenAI()
-        requests = f.readlines()
-        for i, request in enumerate(requests):
-            request = json.loads(request)
-            logger.info(f"processing request: {request['custom_id']}")
-            console.print(f"processing request: {request['custom_id']}")
-            response = F.completion_with_backoff(client, request['body'])
-            if format == "text":
-                out_file = out / f"{request['custom_id']}-response.txt"
-                out_file.write_text(response.choices[0].message.content)
-            elif format == "json":   
-                out_file = out / f"{request['custom_id']}-response.json"
-                out_file.write_text(response.to_json())
-
-
 # -----------------------------------------------------------------------------
 @app.command()
 def make(
