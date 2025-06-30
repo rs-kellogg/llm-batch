@@ -1,20 +1,15 @@
 import json
-import math
 
-import fitz
 import openai
 import yaml
 import logging
 import logging.config
-import polars as pl
 
-from pathlib import Path, PosixPath
-from dotenv import load_dotenv, find_dotenv
-from rich.progress import track
+from pathlib import Path
+from dotenv import load_dotenv
 from rich.console import Console
 from datetime import datetime
 from importlib import resources
-from typing import List, Dict
 from cyclopts import App, Parameter
 from typing_extensions import Annotated
 
@@ -62,65 +57,48 @@ def config() -> None:
     "Display configuration parameters"
     console.print(CONFIG)
 
+
 # ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def make(
-    prompt_template_file: Annotated[Path, Parameter(help="Prompt template file")] = None,
-    data_file: Annotated[Path, Parameter(help="Data file")] = None,
-    id_col: Annotated[str, Parameter(help="Column name for the id")] = "id",
+    in_dir: Annotated[Path, Parameter(help="Path to input files")] = Path("."),
     out: Annotated[Path, Parameter(help="Path to output file")] = Path("."),
     batch_name: Annotated[str, Parameter("--batch", help="Batch name")] = "batch",
 ) -> None:
     """
     Make a batch file for uploading to OpenAI
     """
-    pass
-    # # Read the prompt template file
-    # prompt_template = prompt_template_file.read_text()
+    json_files = [f for f in in_dir.glob("*.json")]
+    if not json_files:
+        console.print("[red]No JSON files found in the input directory.[/red]")
+        return
 
-    # # Read the data file
-    # df = pl.DataFrame()
-    # print(f"Data file: {data_file}, {data_file.suffix}")
-    # if data_file.suffix == ".csv":
-    #     df = pl.read_csv(data_file)
-    # elif data_file.suffix == ".xlsx":
-    #     df = pl.read_excel(data_file)
-    # if id_col not in df.columns:
-    #     df = df.with_row_index(name=id_col)
+    # Create the output file
+    if not out.exists():
+        out.mkdir(parents=True)
+    out_file = out / f"{batch_name}-requests.jsonl"
+    out_file.write_text("")
 
-    # for col in df.columns:
-    #     if col.startswith("file"):
-    #         df = df.with_columns(pl.col(col).map_elements(lambda x: Path(x).read_text()))
-
-    # print(df.head())
-
-    # # Create the output file
-    # if not out.exists():
-    #     out.mkdir(parents=True)
-    # out_file = out / f"{batch_name}-requests.jsonl"
-    # out_file.write_text("")
-
-    # # Loop through the data to create a jsonl batch file
-    # requests = []
-    # data: List[Dict] = df.to_dicts()
-    # for index in track(range(len(data)), description="Processing..."):
-    #     try:
-    #         body = chevron.render(prompt_template, data[index])
-    #         # body = json.loads(body)
-    #         print(body)
-    #         request = {
-    #             "custom_id": f"id_{data[index][id_col]}",
-    #             "method": "POST",
-    #             "url": "/v1/chat/completions",
-    #             "body": body,
-    #         }
-    #         requests.append(request)
-    #     except Exception as e:
-    #         console.print(f"\nError processing row {index}: {e}")
-    #         return
-
-    # out_file.write_text("\n".join([json.dumps(r) for r in requests]))
-    # console.print(f"Batch file created: {out_file}")
+    # Loop through the JSON request files
+    requests = []
+    for f in json_files:
+        try:
+            console.print(f"[green]Found JSON file:[/green] {f}")
+            request_body = json.loads(f.read_text())
+            if "request" in request_body:
+                request_body = request_body["request"]
+            request = {
+                "custom_id": f"id_{f.name}",
+                "method": "POST",
+                "url": "/v1/chat/completions",
+                "body": request_body,
+            }
+            requests.append(request)
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Error decoding JSON in file {f}: {e}[/red]")
+            continue
+    out_file.write_text("\n".join([json.dumps(r) for r in requests]))
+    console.print(f"Batch file created: {out_file}")
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -143,7 +121,9 @@ def send(
 @app.command()
 def start(
     batch_file_id: Annotated[str, Parameter(help="Batch file ID")] = None,
-    description: Annotated[str, Parameter("--desc", help="Description of the batch job")] = "batch job",
+    description: Annotated[
+        str, Parameter("--desc", help="Description of the batch job")
+    ] = "batch job",
 ):
     """
     Start a batch job on OpenAI
@@ -163,7 +143,9 @@ def start(
 @app.command()
 def fetch(
     batch_id: Annotated[str, Parameter(help="Batch ID")] = None,
-    out: Annotated[Path, Parameter("--out", "-o", help="Path to output file")] = Path("."),
+    out: Annotated[Path, Parameter("--out", "-o", help="Path to output file")] = Path(
+        "."
+    ),
     batch_name: Annotated[str, Parameter("--batch", help="Batch name")] = "batch",
 ):
     """
@@ -185,7 +167,9 @@ def fetch(
 # ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def list(
-    limit: Annotated[int, Parameter("--limit", "-l", help="Limit the number of batches to list")] = 100,
+    limit: Annotated[
+        int, Parameter("--limit", "-l", help="Limit the number of batches to list")
+    ] = 100,
 ):
     """
     List all OpenAI batches for your account
