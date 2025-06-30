@@ -22,9 +22,9 @@ from llm_batch import data
 from llm_batch import __version__
 
 
-# -----------------------------------------------------------------------------
-# setup
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
+# Globals
+# ---------------------------------------------------------------------------------------------------------------------
 
 load_dotenv()
 
@@ -50,60 +50,19 @@ logger = logging.getLogger(__name__)
 # add sub-apps
 # batch_app = App(help="Help string for the asynchronous batch application.", version=__version__)
 # app.command(batch_app, name="batch")
-utils_app = App(help="Utility commands for supporting batch jobs", version=__version__)
-app.command(utils_app, name="utils")
+# utils_app = App(help="Utility commands for supporting batch jobs", version=__version__)
+# app.command(utils_app, name="utils")
 
 
-# -----------------------------------------------------------------------------
-# utils commands
-# -----------------------------------------------------------------------------
-@utils_app.command()
+# ---------------------------------------------------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------------------------------------------------
+@app.command()
 def config() -> None:
     "Display configuration parameters"
-    console.print(f"{CONFIG}")
+    console.print(CONFIG)
 
-
-# -----------------------------------------------------------------------------
-@utils_app.command()
-def display(
-    file: Annotated[Path, Parameter(help="Path to file")] = None,
-):
-    """
-    Display the contents of a file
-    """
-    console.print(file.read_text())
-
-
-# -----------------------------------------------------------------------------
-@utils_app.command()
-def pdf2text(
-    in_dir: Annotated[Path, Parameter(help="Path to input PDF files")] = None,
-    out: Annotated[Path, Parameter(help="Path to output text files")] = Path("."),
-    start: Annotated[int, Parameter(help="Start page")] = 0,
-    end: Annotated[int, Parameter(help="End page")] = math.inf,
-):
-    """
-    Extract text from a collection of PDF files and write each output to a text file.
-    """
-    assert end >= start
-    if not out.exists():
-        out.mkdir(parents=True)
-
-    for pdf in in_dir.glob("*.pdf"):
-        console.print(f"processing pdf file: {pdf.name}")
-        logging.info(f"extracting text from: {pdf.name}")
-        try:
-            doc = fitz.open(pdf)
-            textfile = out / f"{pdf.stem}.txt"
-            pages = [page for page in doc if start <= page.number <= end]
-            textfile.write_text(chr(12).join([page.get_text(sort=True) for page in pages]))
-        except Exception as e:
-            logger.error(f"exception: {type(e)}: {e}")
-            continue
-
-# -----------------------------------------------------------------------------
-# batch commands
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def make(
     prompt_template_file: Annotated[Path, Parameter(help="Prompt template file")] = None,
@@ -115,56 +74,56 @@ def make(
     """
     Make a batch file for uploading to OpenAI
     """
+    pass
+    # # Read the prompt template file
+    # prompt_template = prompt_template_file.read_text()
 
-    # Read the prompt template file
-    prompt_template = prompt_template_file.read_text()
+    # # Read the data file
+    # df = pl.DataFrame()
+    # print(f"Data file: {data_file}, {data_file.suffix}")
+    # if data_file.suffix == ".csv":
+    #     df = pl.read_csv(data_file)
+    # elif data_file.suffix == ".xlsx":
+    #     df = pl.read_excel(data_file)
+    # if id_col not in df.columns:
+    #     df = df.with_row_index(name=id_col)
 
-    # Read the data file
-    df = pl.DataFrame()
-    print(f"Data file: {data_file}, {data_file.suffix}")
-    if data_file.suffix == ".csv":
-        df = pl.read_csv(data_file)
-    elif data_file.suffix == ".xlsx":
-        df = pl.read_excel(data_file)
-    if id_col not in df.columns:
-        df = df.with_row_index(name=id_col)
+    # for col in df.columns:
+    #     if col.startswith("file"):
+    #         df = df.with_columns(pl.col(col).map_elements(lambda x: Path(x).read_text()))
 
-    for col in df.columns:
-        if col.startswith("file"):
-            df = df.with_columns(pl.col(col).map_elements(lambda x: Path(x).read_text()))
+    # print(df.head())
 
-    print(df.head())
+    # # Create the output file
+    # if not out.exists():
+    #     out.mkdir(parents=True)
+    # out_file = out / f"{batch_name}-requests.jsonl"
+    # out_file.write_text("")
 
-    # Create the output file
-    if not out.exists():
-        out.mkdir(parents=True)
-    out_file = out / f"{batch_name}-requests.jsonl"
-    out_file.write_text("")
+    # # Loop through the data to create a jsonl batch file
+    # requests = []
+    # data: List[Dict] = df.to_dicts()
+    # for index in track(range(len(data)), description="Processing..."):
+    #     try:
+    #         body = chevron.render(prompt_template, data[index])
+    #         # body = json.loads(body)
+    #         print(body)
+    #         request = {
+    #             "custom_id": f"id_{data[index][id_col]}",
+    #             "method": "POST",
+    #             "url": "/v1/chat/completions",
+    #             "body": body,
+    #         }
+    #         requests.append(request)
+    #     except Exception as e:
+    #         console.print(f"\nError processing row {index}: {e}")
+    #         return
 
-    # Loop through the data to create a jsonl batch file
-    requests = []
-    data: List[Dict] = df.to_dicts()
-    for index in track(range(len(data)), description="Processing..."):
-        try:
-            body = chevron.render(prompt_template, data[index])
-            # body = json.loads(body)
-            print(body)
-            request = {
-                "custom_id": f"id_{data[index][id_col]}",
-                "method": "POST",
-                "url": "/v1/chat/completions",
-                "body": body,
-            }
-            requests.append(request)
-        except Exception as e:
-            console.print(f"\nError processing row {index}: {e}")
-            return
-
-    out_file.write_text("\n".join([json.dumps(r) for r in requests]))
-    console.print(f"Batch file created: {out_file}")
+    # out_file.write_text("\n".join([json.dumps(r) for r in requests]))
+    # console.print(f"Batch file created: {out_file}")
 
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def send(
     batch_file: Annotated[Path, Parameter(help="Batch file")] = None,
@@ -180,7 +139,7 @@ def send(
     logger.info(f"{batch_input_file}")
 
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def start(
     batch_file_id: Annotated[str, Parameter(help="Batch file ID")] = None,
@@ -200,7 +159,7 @@ def start(
     console.print(batch_create_response)
 
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def fetch(
     batch_id: Annotated[str, Parameter(help="Batch ID")] = None,
@@ -208,7 +167,7 @@ def fetch(
     batch_name: Annotated[str, Parameter("--batch", help="Batch name")] = "batch",
 ):
     """
-    Download batch results to a file if the batch job is completed. If not completed, the status is displayed.
+    Download batch results to a file if the batch job is completed, else job status is displayed.
     """
     client = openai.OpenAI()
     batch_retrieve_response = client.batches.retrieve(batch_id)
@@ -223,7 +182,7 @@ def fetch(
         console.print(f"[orange1]writing json output to {out_file}")
 
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def list(
     limit: Annotated[int, Parameter("--limit", "-l", help="Limit the number of batches to list")] = 100,
@@ -238,8 +197,8 @@ def list(
         console.print(b.id, b.status, datetime.fromtimestamp(b.created_at))
 
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 # main
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     app()
