@@ -21,7 +21,7 @@ logging:
           class: logging.FileHandler
           level: INFO
           formatter: detailed
-          filename: openai_batch.log
+          filename: llm-helper.log
           mode: a
 
   loggers:

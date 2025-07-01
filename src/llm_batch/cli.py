@@ -33,7 +33,7 @@ load_dotenv(dotenv_path=os.getcwd())
 
 
 help_msg = """
-Commands to execute LLM batcb jobs.
+Commands to instantiate prompt templates and to execute LLM batch jobs.
 """
 app = App(help=help_msg, version=__version__)
 
@@ -55,6 +55,9 @@ logger = logging.getLogger(__name__)
 # app.command(template_app, name="template")
 batch_app = App(help="Batching commands", version=__version__)
 app.command(batch_app, name="batch")
+openai_batch_app = App(help="OpenAI batching commands", version=__version__)
+batch_app.command(openai_batch_app, name="openai")
+
 utils_app = App(help="Utility commands", version=__version__)
 app.command(utils_app, name="utils")
 
@@ -66,11 +69,11 @@ def extract_combinations(dict_of_lists: Dict[str, List]) -> List[Dict[str, str]]
     """
     Given a dict of lists, return all possible combinations (cartesian product).
     """
-    keys = list(dict_of_lists.keys())
-    value_lists = list(product(*dict_of_lists.values()))
+    keys = list(dict_of_lists.keys()) # type: ignore
+    value_lists = list(product(*dict_of_lists.values())) # type: ignore
     combinations = []
-    for values in value_lists:
-        comb = dict(zip(keys, values))
+    for values in value_lists: # type: ignore
+        comb = dict(zip(keys, values)) # type: ignore
         combinations.append(comb)
     return combinations
 
@@ -133,7 +136,7 @@ def pdf2text(
 # ---------------------------------------------------------------------------------------------------------------------
 # Commands: batch
 # ---------------------------------------------------------------------------------------------------------------------
-@batch_app.command()
+@openai_batch_app.command()
 def make(
     in_dir: Annotated[Path, Parameter(help="Path to input files")] = Path("."),
     out: Annotated[Path, Parameter(help="Path to output file")] = Path("."),
@@ -176,7 +179,7 @@ def make(
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-@batch_app.command()
+@openai_batch_app.command()
 def send(
     batch_file: Annotated[Path, Parameter(help="Batch file")] = None, # type: ignore
 ):
@@ -192,7 +195,7 @@ def send(
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-@batch_app.command()
+@openai_batch_app.command()
 def start(
     batch_file_id: Annotated[str, Parameter(help="Batch file ID")] = None, # type: ignore
     description: Annotated[
@@ -214,7 +217,7 @@ def start(
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-@batch_app.command()
+@openai_batch_app.command()
 def fetch(
     batch_id: Annotated[str, Parameter(help="Batch ID")] = None, # type: ignore
     out: Annotated[Path, Parameter("--out", help="Path to output file")] = Path("."),
@@ -228,7 +231,7 @@ def fetch(
     logger.info(batch_retrieve_response)
     console.print(batch_retrieve_response)
     if batch_retrieve_response.status == "completed":
-        file_response = client.files.content(batch_retrieve_response.output_file_id)
+        file_response = client.files.content(batch_retrieve_response.output_file_id) # type: ignore
         out.mkdir(parents=True, exist_ok=True)
         out_file = out / f"{batch_name}-responses.jsonl"
         out_file.write_text(file_response.text)
@@ -237,7 +240,7 @@ def fetch(
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-@batch_app.command()
+@openai_batch_app.command()
 def list(
     limit: Annotated[
         int, Parameter("--limit", help="Limit the number of batches to list")
@@ -265,7 +268,7 @@ def template(
     ),
     requests_only: Annotated[
         bool, Parameter(help="Generate request JSON only, no API calls made")
-    ] = False,
+    ] = True,
 ) -> None:
     """
     Generate prompts from a template and data file, and optionally make API calls.
