@@ -51,12 +51,14 @@ logger = logging.getLogger(__name__)
 
 
 # add sub-apps
-# template_app = App(help="Templating commands", version=__version__)
-# app.command(template_app, name="template")
 batch_app = App(help="Batching commands", version=__version__)
 app.command(batch_app, name="batch")
 openai_batch_app = App(help="OpenAI batching commands", version=__version__)
+anthropic_batch_app = App(help="Anthropic batching commands", version=__version__)
+gemini_batch_app = App(help="Gemini batching commands", version=__version__)
 batch_app.command(openai_batch_app, name="openai")
+batch_app.command(anthropic_batch_app, name="anthropic")
+batch_app.command(gemini_batch_app, name="gemini")
 
 utils_app = App(help="Utility commands", version=__version__)
 app.command(utils_app, name="utils")
