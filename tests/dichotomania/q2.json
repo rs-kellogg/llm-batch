@@ -1,0 +1,30 @@
+{
+  "model": "{{ model }}",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "{% include "q2-content.jinja2" %}",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "response_format": {
+    "type": "json_schema", 
+    "json_schema": {
+      "name": "single_option",
+      "strict": true,
+      "schema": {
+        "additionalProperties": false, 
+        "properties": {
+          "selection": {"enum": ["A", "B", "C", "D"], "title": "Selection", "type": "string"}}, 
+          "required": ["selection"], 
+          "title": "Option", 
+          "type": "object"
+      }
+    }
+  },
+  "temperature": 1
+}    

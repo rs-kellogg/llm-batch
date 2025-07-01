@@ -1,0 +1,81 @@
+
+{
+"template_params": {
+  "model": "claude-opus-4-20250514",
+  "pvalue": "0.099",
+  "version": "v2"
+},
+"request": {
+  "model": "claude-opus-4-20250514",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Below is a summary of a study from an academic paper:\n \nThe study aimed to test how two different drugs impact whether a patient recovers from a certain disease. Subjects were randomly drawn from a fixed population and then randomly assigned to Drug A or Drug B. Fifty-two percent (52%) of subjects who took Drug A recovered from the disease while forty-four percent (44%) of subjects who took Drug B recovered from the disease.\n \nA test of the null hypothesis that there is no difference between Drug A and Drug B in terms of probability of recovery from the disease yields a *p*-value of 0.099.\n \nAssuming no prior studies have been conducted with these drugs, what drug would you advise physicians treating patients from the same population as those in the study prescribe for their patients?\n\nOption A. I would advise Drug A.\n\nOption B. I would advise Drug B.\n\nOption C. I would advise that there is no difference between Drug A and Drug B.\n\nIn considering this question, it might be helpful to bear in mind the six principles articulated in the 2016 American Statistical Association *Statement on Statistical Significance and *P*-values*:\n\nPrinciple 1. *P*-values can indicate how incompatible the data are with a specified statistical model.\n\nPrinciple 2. *P*-values do not measure the probability that the studied hypothesis is true, or the probability that the data were produced by random chance alone.\n\nPrinciple 3. Scientific conclusions and business or policy decisions should not be based only on whether a *p*-value passes a specific threshold.\n\nPrinciple 4. Proper inference requires full reporting and transparency.\n\nPrinciple 5. A *p*-value, or statistical significance, does not measure the size of an effect or the importance of a result.\n\nPrinciple 6. By itself, a *p*-value does not provide a good measure of evidence regarding a model or hypothesis.\n\nPlease answer only Option A, Option B, or Option C.",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "single_option",
+      "strict": true,
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "selection": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Selection",
+            "type": "string"
+          }
+        },
+        "required": [
+          "selection"
+        ],
+        "title": "Option",
+        "type": "object"
+      }
+    }
+  },
+  "temperature": 1
+},
+"response": {
+  "id": "chatcmpl-de9ab729-218f-452e-af0f-7a498f05b3da",
+  "created": 1750734366,
+  "model": "claude-opus-4-20250514",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\"selection\": \"A\"}",
+        "role": "assistant",
+        "tool_calls": null,
+        "function_call": null
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 33,
+    "prompt_tokens": 848,
+    "total_tokens": 881,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
+}

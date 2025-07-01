@@ -1,0 +1,89 @@
+
+{
+"template_params": {
+  "model": "gemini/gemini-2.5-pro",
+  "pvalue": "0.101",
+  "preamble": "no",
+  "version": "v1"
+},
+"request": {
+  "model": "gemini/gemini-2.5-pro",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Below is a summary of a study from an academic paper.\n\nThe study aimed to test how different interventions might affect terminal cancer patients' survival. Subjects were randomly assigned to one of two groups. Group A was instructed to write daily about positive things they were blessed with while Group B was instructed to write daily about misfortunes that others had to endure. Subjects were then tracked until all had died. Subjects in Group A lived, on average, 8.2 months post-diagnosis whereas subjects in Group B lived, on average, 7.5 months post-diagnosis (*p* = 0.101).\n\nWhich statement is the most accurate summary of the results?\n\nOption A. The average number of post-diagnosis months lived by the subjects who were in Group A was **greater** than that lived by the subjects who were in Group B.\n\nOption B. The average number of post-diagnosis months lived by the subjects who were in Group A was **less** than that lived by the subjects who were in Group B.\n\nOption C. The average number of post-diagnosis months lived by the subjects who were in Group A was **no different** than that lived by the subjects who were in Group B.\n\nOption D. It **cannot be determined** whether the average number of post-diagnosis months lived by the subjects who were in Group A was greater / no different / less than that lived by the subjects who were in Group B.\n\nPlease answer only Option A, Option B, Option C, or Option D.",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "single_option",
+      "strict": true,
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "selection": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Selection",
+            "type": "string"
+          }
+        },
+        "required": [
+          "selection"
+        ],
+        "title": "Option",
+        "type": "object"
+      }
+    }
+  },
+  "temperature": 1
+},
+"response": {
+  "id": "NBBaaO3wEv3K_uMPzIPEmQM",
+  "created": 1750732838,
+  "model": "gemini-2.5-pro",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\n  \"selection\": \"A\"\n}",
+        "role": "assistant",
+        "tool_calls": null,
+        "function_call": null
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 1282,
+    "prompt_tokens": 313,
+    "total_tokens": 1595,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 1271,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": null
+    }
+  },
+  "vertex_ai_grounding_metadata": [],
+  "vertex_ai_url_context_metadata": [],
+  "vertex_ai_safety_results": [],
+  "vertex_ai_citation_metadata": []
+}
+}

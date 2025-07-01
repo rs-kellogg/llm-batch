@@ -1,0 +1,19 @@
+model:
+  - "gemini/gemini-2.5-pro"
+  - "claude-opus-4-20250514"
+  - "claude-sonnet-4-20250514"
+  - "o3"
+pvalue:
+ - "0.01" 
+ - "0.049" 
+ - "0.051" 
+ - "0.099" 
+ - "0.101"
+preamble:
+  - "yes"
+  - "no"
+version:
+  - v1
+  - v2
+  - v3
+

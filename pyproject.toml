@@ -6,17 +6,19 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "cyclopts>=3.14.0",
+    "litellm>=1.73.6",
     "openai>=1.76.0",
     "polars>=1.28.1",
     "pymupdf>=1.25.5",
-    "python-dotenv>=1.1.0",
+    "pytest>=8.4.1",
+    "python-dotenv[cli]>=1.1.0",
     "pyyaml>=6.0.2",
     "rich>=14.0.0",
     "tiktoken>=0.9.0",
 ]
 
 [project.scripts]
-llm-batch = "llm_batch.cli:app"
+llm-helper = "llm_batch.cli:app"
 
 [build-system]
 requires = ["hatchling"]

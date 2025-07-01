@@ -1,0 +1,81 @@
+
+{
+"template_params": {
+  "model": "claude-sonnet-4-20250514",
+  "pvalue": "0.049",
+  "version": "v1"
+},
+"request": {
+  "model": "claude-sonnet-4-20250514",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "text": "Below is a summary of a study from an academic paper:\n \nThe study aimed to test how two different drugs impact whether a patient recovers from a certain disease. Subjects were randomly drawn from a fixed population and then randomly assigned to Drug A or Drug B. Fifty-two percent (52%) of subjects who took Drug A recovered from the disease while forty-four percent (44%) of subjects who took Drug B recovered from the disease.\n \nA test of the null hypothesis that there is no difference between Drug A and Drug B in terms of probability of recovery from the disease yields a *p*-value of 0.049.\n \nAssuming no prior studies have been conducted with these drugs, what drug would you advise physicians treating patients from the same population as those in the study prescribe for their patients?\n\nOption A. I would advise Drug A.\n\nOption B. I would advise Drug B.\n\nOption C. I would advise that there is no difference between Drug A and Drug B.\n\nPlease answer only Option A, Option B, or Option C.",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "single_option",
+      "strict": true,
+      "schema": {
+        "additionalProperties": false,
+        "properties": {
+          "selection": {
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D"
+            ],
+            "title": "Selection",
+            "type": "string"
+          }
+        },
+        "required": [
+          "selection"
+        ],
+        "title": "Option",
+        "type": "object"
+      }
+    }
+  },
+  "temperature": 1
+},
+"response": {
+  "id": "chatcmpl-48d94513-627e-4426-ab24-69e2883309ac",
+  "created": 1750734390,
+  "model": "claude-sonnet-4-20250514",
+  "object": "chat.completion",
+  "system_fingerprint": null,
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "{\"selection\": \"A\"}",
+        "role": "assistant",
+        "tool_calls": null,
+        "function_call": null
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 33,
+    "prompt_tokens": 637,
+    "total_tokens": 670,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
+}
