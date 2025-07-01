@@ -71,11 +71,11 @@ def extract_combinations(dict_of_lists: Dict[str, List]) -> List[Dict[str, str]]
     """
     Given a dict of lists, return all possible combinations (cartesian product).
     """
-    keys = list(dict_of_lists.keys()) # type: ignore
-    value_lists = list(product(*dict_of_lists.values())) # type: ignore
+    keys = list(dict_of_lists.keys())
+    value_lists = list(product(*dict_of_lists.values()))
     combinations = []
-    for values in value_lists: # type: ignore
-        comb = dict(zip(keys, values)) # type: ignore
+    for values in value_lists:
+        comb = dict(zip(keys, values))
         combinations.append(comb)
     return combinations
 
@@ -243,13 +243,13 @@ def fetch(
 
 # ---------------------------------------------------------------------------------------------------------------------
 @openai_batch_app.command()
-def list(
+def check(
     limit: Annotated[
         int, Parameter("--limit", help="Limit the number of batches to list")
     ] = 100,
 ):
     """
-    List all OpenAI batches for your account
+    Display all OpenAI batches for your account
     """
     client = openai.OpenAI()
     batches = client.batches.list(limit=limit)
@@ -268,9 +268,9 @@ def template(
     out: Annotated[Path, Parameter(help="Output directory for the responses")] = Path(
         "."
     ),
-    requests_only: Annotated[
-        bool, Parameter(help="Generate request JSON only, no API calls made")
-    ] = True,
+    execute: Annotated[
+        bool, Parameter(help="Run the template and make synchronous API calls")
+    ] = False,
 ) -> None:
     """
     Generate prompts from a template and data file, and optionally make API calls.
@@ -284,9 +284,13 @@ def template(
         raise ValueError(f"Output path {out} is a file, expected a directory")
     if not out.exists():
         os.makedirs(out)
-    if requests_only:
+    if execute:
         console.print(
-            "[bold yellow]Running in request only mode, no API calls will be made[/bold yellow]"
+            "[bold yellow]Running in execute mode, API calls will be made[/bold yellow]"
+        )
+    else:
+        console.print(
+            "[bold yellow]Running in dry-run mode, no API calls will be made[/bold yellow]"
         )
 
     # set up template environment
@@ -320,7 +324,7 @@ def template(
             f.write('"request": ')
             json.dump(chat_params, f, indent=2)
 
-        if requests_only:
+        if not execute:
             response = None
         else:
             try:
