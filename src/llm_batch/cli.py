@@ -183,7 +183,7 @@ def make(
 # ---------------------------------------------------------------------------------------------------------------------
 @openai_batch_app.command()
 def send(
-    batch_file: Annotated[Path, Parameter(help="Batch file")] = None, # type: ignore
+    batch_file: Annotated[Path, Parameter(help="Batch file")] = None,  # type: ignore
 ):
     """
     Upload a batch file to OpenAI
@@ -199,7 +199,7 @@ def send(
 # ---------------------------------------------------------------------------------------------------------------------
 @openai_batch_app.command()
 def start(
-    batch_file_id: Annotated[str, Parameter(help="Batch file ID")] = None, # type: ignore
+    batch_file_id: Annotated[str, Parameter(help="Batch file ID")] = None,  # type: ignore
     description: Annotated[
         str, Parameter("--desc", help="Description of the batch job")
     ] = "batch job",
@@ -221,7 +221,7 @@ def start(
 # ---------------------------------------------------------------------------------------------------------------------
 @openai_batch_app.command()
 def fetch(
-    batch_id: Annotated[str, Parameter(help="Batch ID")] = None, # type: ignore
+    batch_id: Annotated[str, Parameter(help="Batch ID")] = None,  # type: ignore
     out: Annotated[Path, Parameter("--out", help="Path to output file")] = Path("."),
     batch_name: Annotated[str, Parameter("--batch", help="Batch name")] = "batch",
 ):
@@ -233,7 +233,7 @@ def fetch(
     logger.info(batch_retrieve_response)
     console.print(batch_retrieve_response)
     if batch_retrieve_response.status == "completed":
-        file_response = client.files.content(batch_retrieve_response.output_file_id) # type: ignore
+        file_response = client.files.content(batch_retrieve_response.output_file_id)  # type: ignore
         out.mkdir(parents=True, exist_ok=True)
         out_file = out / f"{batch_name}-responses.jsonl"
         out_file.write_text(file_response.text)
@@ -259,7 +259,7 @@ def check(
 
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Commands
+# Commands: template
 # ---------------------------------------------------------------------------------------------------------------------
 @app.command()
 def template(
