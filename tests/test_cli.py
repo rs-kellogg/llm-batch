@@ -46,7 +46,7 @@ def test_prompt_test_mode(tmp_path, capsys):
     cli.extract_combinations = DummyF.extract_combinations
     try:
         cli.template(
-            template=template_file, data=data_file, out=out_dir, requests_only=True
+            template=template_file, data=data_file, out=out_dir, execute=False
         )
         captured = capsys.readouterr()
         assert "Executed combination" in captured.out
