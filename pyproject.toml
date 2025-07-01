@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-llm-helper = "llm_batch.cli:app"
+llm = "llm_batch.cli:app"
 
 [build-system]
 requires = ["hatchling"]

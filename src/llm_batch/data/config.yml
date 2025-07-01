@@ -21,7 +21,7 @@ logging:
           class: logging.FileHandler
           level: INFO
           formatter: detailed
-          filename: llm-helper.log
+          filename: llm-batch.log
           mode: a
 
   loggers:
