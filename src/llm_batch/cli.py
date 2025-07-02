@@ -19,22 +19,19 @@ from tenacity import (
 )
 from llm_batch import __version__, CONFIG, console, logger, app
 from llm_batch.batch_openai import openai_batch_app
+from llm_batch.batch_anthropic import anthropic_batch_app
+from llm_batch.batch_gemini import gemini_batch_app
 
 
 # ---------------------------------------------------------------------------------------------------------------------
 # App setup
-# ---------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 
 batch_app = App(help="Batching commands", version=__version__)
 app.command(batch_app, name="batch")
-
-anthropic_batch_app = App(help="Anthropic batching commands", version=__version__)
-gemini_batch_app = App(help="Gemini batching commands", version=__version__)
-
 batch_app.command(openai_batch_app, name="openai")
 batch_app.command(anthropic_batch_app, name="anthropic")
 batch_app.command(gemini_batch_app, name="gemini")
-
 
 utils_app = App(help="Utility commands", version=__version__)
 app.command(utils_app, name="utils")
