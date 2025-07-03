@@ -60,6 +60,51 @@ def completion_with_backoff(chat_params, console) -> Dict:
     return response.json()  # type: ignore
 
 
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Commands: batch
+# ---------------------------------------------------------------------------------------------------------------------
+@batch_app.command()
+def make(
+    in_dir: Annotated[Path, Parameter(help="Path to input files")] = Path("."),
+    out: Annotated[Path, Parameter(help="Path to output file")] = Path("."),
+    batch_name: Annotated[str, Parameter("--batch", help="Batch name")] = "batch",
+) -> None:
+    """
+    Make a batch requests file.
+    """
+    json_files = [f for f in in_dir.glob("*.json")]
+    if not json_files:
+        console.print("[red]No JSON files found in the input directory.[/red]")
+        return
+
+    # Create the output file
+    if not out.exists():
+        out.mkdir(parents=True)
+    out_file = out / f"{batch_name}-requests.jsonl"
+    out_file.write_text("")
+
+    # Loop through the JSON request files
+    requests = []
+    for f in json_files:
+        try:
+            console.print(f"[green]Found JSON file:[/green] {f}")
+            request_body = json.loads(f.read_text())
+            if "request" in request_body:
+                request_body = request_body["request"]
+            request = {
+                "custom_id": f"id_{f.name}",
+                "method": "POST",
+                "url": "/v1/chat/completions",
+                "body": request_body,
+            }
+            requests.append(request)
+        except json.JSONDecodeError as e:
+            console.print(f"[red]Error decoding JSON in file {f}: {e}[/red]")
+            continue
+    out_file.write_text("\n".join([json.dumps(r) for r in requests]))
+    console.print(f"Batch file created: {out_file}")
+
 # ---------------------------------------------------------------------------------------------------------------------
 # Commands: utils
 # ---------------------------------------------------------------------------------------------------------------------

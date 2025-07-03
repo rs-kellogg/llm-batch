@@ -20,51 +20,11 @@ openai_batch_app = App(help="OpenAI batching commands", version=__version__)
 # Commands
 # ---------------------------------------------------------------------------------------------------------------------
 @openai_batch_app.command()
-def make(
-    in_dir: Annotated[Path, Parameter(help="Path to input files")] = Path("."),
-    out: Annotated[Path, Parameter(help="Path to output file")] = Path("."),
-    batch_name: Annotated[str, Parameter("--batch", help="Batch name")] = "batch",
-) -> None:
-    """
-    Make a batch file for uploading to OpenAI
-    """
-    json_files = [f for f in in_dir.glob("*.json")]
-    if not json_files:
-        console.print("[red]No JSON files found in the input directory.[/red]")
-        return
-
-    # Create the output file
-    if not out.exists():
-        out.mkdir(parents=True)
-    out_file = out / f"{batch_name}-requests.jsonl"
-    out_file.write_text("")
-
-    # Loop through the JSON request files
-    requests = []
-    for f in json_files:
-        try:
-            console.print(f"[green]Found JSON file:[/green] {f}")
-            request_body = json.loads(f.read_text())
-            if "request" in request_body:
-                request_body = request_body["request"]
-            request = {
-                "custom_id": f"id_{f.name}",
-                "method": "POST",
-                "url": "/v1/chat/completions",
-                "body": request_body,
-            }
-            requests.append(request)
-        except json.JSONDecodeError as e:
-            console.print(f"[red]Error decoding JSON in file {f}: {e}[/red]")
-            continue
-    out_file.write_text("\n".join([json.dumps(r) for r in requests]))
-    console.print(f"Batch file created: {out_file}")
-
-
-# ---------------------------------------------------------------------------------------------------------------------
-@openai_batch_app.command()
 def send(
     batch_file: Annotated[Path, Parameter(help="Batch file")] = None,  # type: ignore
+    description: Annotated[
+        str, Parameter("--desc", help="Description of the batch job")
+    ] = "batch job from batch",  # type: ignore
 ):
     """
     Upload a batch file to OpenAI
@@ -75,29 +35,14 @@ def send(
     console.print(f"[orange1]{batch_input_file}")
     logger.info(f"Uploaded batch file: {batch_file}")
     logger.info(f"{batch_input_file}")
-
-
-# ---------------------------------------------------------------------------------------------------------------------
-@openai_batch_app.command()
-def start(
-    batch_file_id: Annotated[str, Parameter(help="Batch file ID")] = None,  # type: ignore
-    description: Annotated[
-        str, Parameter("--desc", help="Description of the batch job")
-    ] = "batch job",
-):
-    """
-    Start a batch job on OpenAI
-    """
-    client = openai.OpenAI()
     batch_create_response = client.batches.create(
-        input_file_id=batch_file_id,
+        input_file_id=batch_input_file.id,
         endpoint="/v1/chat/completions",
         completion_window="24h",
-        metadata={"description": description},
+        metadata={"description": f"{description}: {batch_file.name}"},
     )
-    logger.info(batch_create_response)
-    console.print(batch_create_response)
-
+    console.print(f"Batch created: {batch_create_response.id}")
+    logger.info(f"Batch created: {batch_create_response.id}")
 
 # ---------------------------------------------------------------------------------------------------------------------
 @openai_batch_app.command()
